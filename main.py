@@ -1,6 +1,7 @@
 #### Imports et définition des variables globales
-
-import random
+"""
+opérations sur les sets 
+"""
 
 FILENAME = "corpus.txt"
 ALPHABET = list("abcdefghijklmnopqrstuvwxyz")
@@ -33,8 +34,10 @@ def read_data(filename):
     >>> mots[166128]
     'gloire'
     """
-    
-    return None
+    with open (filename, "r", encoding="utf-8") as f :
+        mots = [ligne.strip() for ligne in f]
+
+    return mots
 
 
 def ensemble_mots(filename):
@@ -56,8 +59,12 @@ def ensemble_mots(filename):
     >>> "glycosudrique" in mots
     False
     """
-    
-    return None
+    dico = set()
+    liste = read_data(filename)
+    for mot in liste :
+        dico.add(mot)
+
+    return dico
 
 
 def mots_de_n_lettres(mots, n):
@@ -81,12 +88,17 @@ def mots_de_n_lettres(mots, n):
     >>> sorted(list(mots_de_n_lettres(mots,23)))[0]
     'constitutionnalisassent'
     >>> sorted(list(mots_de_n_lettres(mots,24)))
-    ['constitutionnalisassions', 'constitutionnaliseraient', 'hospitalo-universitaires', 'oto-rhino-laryngologiste']
+    ['constitutionnalisassions', 'constitutionnaliseraient',
+    'hospitalo-universitaires', 'oto-rhino-laryngologiste']
     >>> sorted(list(mots_de_n_lettres(mots,25)))
     ['anticonstitutionnellement', 'oto-rhino-laryngologistes']
     """
-    
-    return None
+    n_lettres = set() #set vide
+    for mot in mots : #parcours du set
+        if len(mot) == n :
+            n_lettres.add(mot) #ajoute le mot au set si n lettres
+
+    return n_lettres
 
 
 def mots_avec(mots, s):
@@ -112,8 +124,12 @@ def mots_avec(mots, s):
     >>> sorted(list(mk))[999::122]
     ['képi', 'nickela', 'parkérisiez', 'semi-coke', 'stockais', 'week-end']
     """
-    
-    return None
+    s_dedans = set()
+    for mot in mots :
+        if s in mot :
+            s_dedans.add(mot)
+
+    return s_dedans
 
 
 def cherche1(mots, start, stop, n):
@@ -137,10 +153,11 @@ def cherche1(mots, start, stop, n):
     >>> sorted(list(m_z))[4:7]
     ['zinguez', 'zippiez', 'zonerez']
     """
-    
-    return None
-
-
+    mots_debut_fin_n = set()
+    for mot in mots :
+        if mot.startswith(start) and mot.endswith(stop) and len(mot)==n:
+            mots_debut_fin_n.add(mot)
+    return mots_debut_fin_n
 def cherche2(mots, lstart, lmid, lstop, nmin, nmax):
     """effectue une recherche complexe dans un ensemble de mots
 
@@ -153,7 +170,10 @@ def cherche2(mots, lstart, lmid, lstop, nmin, nmax):
         nmax (int): nombre de lettres maximum
 
     Returns:
-        set: retourne le sous ensemble des mots commençant par une chaine présente dans lstart, contenant une chaine présente dans lmid et finissant par une chaine présente dans lstop, avec un nombre de lettres entre nmin et nmax
+        set: retourne le sous ensemble des mots commençant
+        par une chaine présente dans lstart, contenant une chaine présente dans
+        lmid et finissant par une chaine présente dans lstop, avec un nombre 
+        de lettres entre nmin et nmax
 
     >>> mots = ensemble_mots(FILENAME)
     >>> mab17ez = cherche2(mots, 'a', 'b', 'z', 16, 16)
@@ -164,15 +184,57 @@ def cherche2(mots, lstart, lmid, lstop, nmin, nmax):
     >>> mab17ez
     {'alphabétisassiez'}
     """
-    
-    return None
+    resultat = set()
 
+    for mot in mots:
+        n = len(mot)
+
+        #Vérifier la longueur
+        if not nmin <= n <= nmax :
+            continue
+
+        #Vérifier que le mot commence par un des préfixes
+        if not any(mot.startswith(start) for start in lstart):
+            continue
+
+        #Vérifier que le mot se termine par un des suffixes
+        if not any(mot.endswith(stop) for stop in lstop):
+            continue
+
+        # Vérifier que le mot contient une des chaînes intermédiaires
+        #     mais pas en début ni en fin
+        if not any(mid in mot[1:-1] for mid in lmid):
+            continue
+
+        # Si toutes les conditions sont respectées, ajouter au résultat
+        resultat.add(mot)
+
+    return resultat
 
 def main():
-    pass
-    mots = read_data(FILENAME)
-    ens = ensemble_mots(FILENAME)
-    # print( [ mot for mot in ["chronophage", "procrastinateur", "dangerosité", "gratifiant"] if mot in ens ] )
+    """
+    principaux appels aux fonctions pour répondre aux questinos
+    de l'énoncé et tester les résultats
+    """
+    mots = read_data('corpus.txt')
+    print(mots[24499])
+    print(mots[28281])
+    print(mots[57305])
+    print(mots[118091])
+    print(mots[199316])
+    print(mots[223435])
+    print(mots[336455])
+    print( 'bayadères' in read_data('corpus.txt'))
+    print (len(read_data('corpus.txt')))
+    print(mots_de_n_lettres(ensemble_mots('corpus.txt'),3))
+    print(mots_avec(ensemble_mots('corpus.txt'),'moudre'))
+    print(cherche1(ensemble_mots('corpus.txt'), 'z', '', 14))
+    print(cherche1(ensemble_mots('corpus.txt'), 'sur',
+                   'ons', 17)&mots_avec(ensemble_mots('corpus.txt'),'x'))
+    print(cherche2(ensemble_mots('corpus.txt'),
+                   list("bcdfghjklmnpqrstvwxz"), 'ç', "aeiouy", 8, 12))
+    # print( [ mot for mot in ["chronophage", "procrastinateur", "dangerosité",
+    #  "gratifiant"] if mot in ens ] )
     # m17 = mots_de_n_lettres(ens, 17)
     # print(len(m17))
     # print( random.sample(list(m17), 10) )
@@ -220,13 +282,14 @@ if __name__ == "__main__":
 
 # def main():
 #     mots = liste_mots(FILENAME)
-    
 #     print( [ mots[i] for i in [24499, 28281, 57305, 118091, 199316, 223435, 336455] ])
-#     # ['bachi-bouzouks', 'bayadères', 'coloquintes', 'ectoplasmes', 'macchabées', 'oryctéropes', 'zouaves']
-    
-#     print([ mot for mot in ["chronophage", "procrastinateur", "dangerosité", "gratifiant"] if mot in mots ])
+#     # ['bachi-bouzouks', 'bayadères', 'coloquintes', 'ectoplasmes',
+# 'macchabées', 'oryctéropes', 'zouaves']
+
+#     print([ mot for mot in ["chronophage", "procrastinateur", "dangerosité", "gratifiant"]
+#     if mot in mots ])
 #     # ['dangerosité', 'gratifiant']
-    
+
 #     m7 = mots_de_n_lettres(mots, 7)
 #     print(len(m7))
 #     # # 27945 mots de 7 lettres
@@ -251,11 +314,11 @@ if __name__ == "__main__":
 #     # 35177 mots contenant un z
 
 #     m_z = { mot for mot in mz if mot.startswith('z')}
-#     print(len(m_z))    
+#     print(len(m_z))
 #     # 796 mots commençant par z
 
 #     mz_ = { mot for mot in mz if mot.endswith('z')}
-#     print(len(mz_))    
+#     print(len(mz_))
 #     # 33118 mots terminant par z
 
 #     mznt = mz - m_z - mz_
@@ -268,11 +331,11 @@ if __name__ == "__main__":
 #     print(mznt&mk)
 
 #     m_k = { mot for mot in mk if mot.startswith('k')}
-#     print(len(m_k))    
+#     print(len(m_k))
 #     # 491 mots commençant par k
 
 #     mk_ = { mot for mot in mk if mot.endswith('k')}
-#     print(len(mk_))    
+#     print(len(mk_))
 #     # 84 mots terminant par k
 
 #     mknt = mk - m_k - mk_
@@ -285,7 +348,3 @@ if __name__ == "__main__":
 
 # if __name__ == "__main__":
 #     main()
-    
-
-
-
